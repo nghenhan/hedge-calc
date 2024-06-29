@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investor Payout Calculator</title>
+    <title>Payout Calculator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
         }
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 50px auto;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 10px;
-            background-color: #f9f9f9;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .form-group {
             margin-bottom: 15px;
@@ -27,16 +30,57 @@
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group-inline {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-group-inline label {
+            margin-left: 5px;
+        }
+        .form-group-inline input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
         .result {
             margin-top: 20px;
             font-weight: bold;
+            color: #007bff;
+            white-space: pre-line; /* Preserve line breaks */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Investor Payout Calculator</h1>
+        <h1>Payout Calculator</h1>
         <div class="form-group">
             <label for="tradingProfit">Total Trading Profit ($)</label>
             <input type="number" id="tradingProfit" required>
@@ -58,8 +102,87 @@
                 <option value="elite">Elite</option>
             </select>
         </div>
+        <div class="form-group-inline">
+            <input type="checkbox" id="hasReferrer">
+            <label for="hasReferrer">Investor has a Referrer</label>
+        </div>
+        <div class="form-group" id="referralLayerGroup" style="display: none;">
+            <label for="referralLayer">Referral Layer</label>
+            <input type="number" id="referralLayer" value="1">
+        </div>
         <button onclick="calculatePayout()">Calculate Payout</button>
         <div class="result" id="result"></div>
+
+        <h2>Tier Information</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tier Name</th>
+                    <th>Minimum Deposit (USDT)</th>
+                    <th>Performance Fee</th>
+                    <th>Profit Commission (%)</th>
+                    <th>Retention Ratio (r)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Starter</td>
+                    <td>2,000</td>
+                    <td>60%</td>
+                    <td>4%</td>
+                    <td>0.45</td>
+                </tr>
+                <tr>
+                    <td>Basic</td>
+                    <td>5,000</td>
+                    <td>58%</td>
+                    <td>4.8%</td>
+                    <td>0.45</td>
+                </tr>
+                <tr>
+                    <td>Bronze</td>
+                    <td>10,000</td>
+                    <td>55%</td>
+                    <td>5.4%</td>
+                    <td>0.45</td>
+                </tr>
+                <tr>
+                    <td>Silver</td>
+                    <td>25,000</td>
+                    <td>50%</td>
+                    <td>6%</td>
+                    <td>0.40</td>
+                </tr>
+                <tr>
+                    <td>Gold</td>
+                    <td>50,000</td>
+                    <td>50%</td>
+                    <td>6.6%</td>
+                    <td>0.35</td>
+                </tr>
+                <tr>
+                    <td>Platinum</td>
+                    <td>100,000</td>
+                    <td>45%</td>
+                    <td>7.1%</td>
+                    <td>0.31</td>
+                </tr>
+                <tr>
+                    <td>Diamond</td>
+                    <td>250,000</td>
+                    <td>42%</td>
+                    <td>7.6%</td>
+                    <td>0.28</td>
+                </tr>
+                <tr>
+                    <td>Elite</td>
+                    <td>500,000</td>
+                    <td>40%</td>
+                    <td>8%</td>
+                    <td>0.25</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -74,15 +197,47 @@
             elite: 0.4
         };
 
+        const referrerCommissions = {
+            starter: { profitCommission: 0.04, retentionRatio: 0.45 },
+            basic: { profitCommission: 0.048, retentionRatio: 0.45 },
+            bronze: { profitCommission: 0.054, retentionRatio: 0.45 },
+            silver: { profitCommission: 0.06, retentionRatio: 0.4 },
+            gold: { profitCommission: 0.066, retentionRatio: 0.35 },
+            platinum: { profitCommission: 0.071, retentionRatio: 0.31 },
+            diamond: { profitCommission: 0.076, retentionRatio: 0.28 },
+            elite: { profitCommission: 0.08, retentionRatio: 0.25 }
+        };
+
+        document.getElementById('hasReferrer').addEventListener('change', function () {
+            const referralLayerGroup = document.getElementById('referralLayerGroup');
+            referralLayerGroup.style.display = this.checked ? 'block' : 'none';
+        });
+
         function calculatePayout() {
             const tradingProfit = parseFloat(document.getElementById('tradingProfit').value);
             const investorShare = parseFloat(document.getElementById('investorShare').value) / 100;
             const investorTier = document.getElementById('investorTier').value;
+            const hasReferrer = document.getElementById('hasReferrer').checked;
+            const referralLayer = hasReferrer ? parseInt(document.getElementById('referralLayer').value) : 0;
 
             const platformFee = tierFees[investorTier];
             const investorPayout = tradingProfit * investorShare * (1 - platformFee);
 
-            document.getElementById('result').textContent = `Investor Payout: $${investorPayout.toFixed(2)}`;
+            let resultText = `Investor Payout: $${investorPayout.toFixed(2)}\n`;
+            if (hasReferrer) {
+                const profitCommission1 = referrerCommissions[investorTier].profitCommission;
+                const retentionRatio = referrerCommissions[investorTier].retentionRatio;
+
+                let totalProfitCommission = 0;
+                for (let n = 1; n <= referralLayer; n++) {
+                    const profitCommissionN = investorPayout * profitCommission1 * Math.pow(retentionRatio, n - 1);
+                    totalProfitCommission += profitCommissionN;
+                    resultText += `Profit Commission for Layer ${n}: $${profitCommissionN.toFixed(2)}\n`;
+                }
+                resultText += `Total Profit Commission: $${totalProfitCommission.toFixed(2)}`;
+            }
+
+            document.getElementById('result').textContent = resultText;
         }
     </script>
 </body>
