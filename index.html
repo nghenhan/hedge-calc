@@ -1,291 +1,497 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Payout Calculator</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            border: 1px solid #333;
-            border-radius: 10px;
-            background-color: #1e1e1e;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #e0e0e0;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #555;
-            border-radius: 5px;
-            background-color: #333;
-            color: #e0e0e0;
-        }
-        .form-group-inline {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .form-group-inline label {
-            margin-left: 5px;
-            color: #e0e0e0;
-        }
-        .form-group-inline input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .result {
-            margin-top: 20px;
-            font-weight: bold;
-            color: #007bff;
-            white-space: pre-line; /* Preserve line breaks */
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid #555;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #333;
-            color: #e0e0e0;
-        }
-        .tier-details {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #999;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Payout Calculator</h1>
-        <div class="form-group">
-            <label for="depositAmount">Deposit Amount ($)</label>
-            <input type="number" id="depositAmount" oninput="selectTierBasedOnDeposit()" required>
-        </div>
-        <div class="form-group">
-            <label for="tradingProfit">Total Trading Profit ($)</label>
-            <input type="number" id="tradingProfit" required>
-        </div>
-        <div class="form-group">
-            <label for="investorShare">Investor Share (%)</label>
-            <input type="number" id="investorShare" required>
-        </div>
-        <div class="form-group">
-            <label for="investorTier">Investor Tier</label>
-            <select id="investorTier" onchange="showTierDetails()" required>
-                <option value="starter">Starter</option>
-                <option value="basic">Basic</option>
-                <option value="bronze">Bronze</option>
-                <option value="silver">Silver</option>
-                <option value="gold">Gold</option>
-                <option value="platinum">Platinum</option>
-                <option value="diamond">Diamond</option>
-                <option value="elite">Elite</option>
-            </select>
-            <div class="tier-details" id="tierDetails"></div>
-        </div>
-        <div class="form-group-inline">
-            <input type="checkbox" id="hasReferrer">
-            <label for="hasReferrer">Investor has a Referrer</label>
-        </div>
-        <div class="form-group" id="referralLayerGroup" style="display: none;">
-            <label for="referralLayer">Referral Layer</label>
-            <input type="number" id="referralLayer" value="1">
-        </div>
-        <button onclick="calculatePayout()">Calculate Payout</button>
-        <div class="result" id="result"></div>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+      }
 
-        <h2>Tier Information</h2>
+      .container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        border: 1px solid #333;
+        border-radius: 10px;
+        background-color: #1e1e1e;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #e0e0e0;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #555;
+        border-radius: 5px;
+        background-color: #333;
+        color: #e0e0e0;
+      }
+
+      .form-group-inline {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .form-group-inline label {
+        margin-left: 5px;
+        color: #e0e0e0;
+      }
+
+      .form-group-inline input[type='checkbox'] {
+        margin-right: 10px;
+      }
+
+      button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #333;
+        border-radius: 10px;
+        background-color: #2a2a2a;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #555;
+      }
+
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #333;
+        color: #e0e0e0;
+      }
+
+      .tier-details {
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #999;
+      }
+
+      .chevron {
+        cursor: pointer;
+        font-size: 1em;
+        display: inline-block;
+        margin-left: 10px;
+        transition: transform 0.3s;
+        border: solid #e0e0e0;
+        border-width: 0 2px 2px 0;
+        padding: 3px;
+      }
+
+      .chevron.collapsed {
+        transform: rotate(-135deg);
+      }
+
+      .chevron.expanded {
+        transform: rotate(45deg);
+      }
+
+      .receipt {
+        width: 100%;
+        border: 1px solid #555;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .receipt th,
+      .receipt td {
+        padding: 10px;
+        border: 1px solid #555;
+      }
+
+      .receipt th {
+        background-color: #444;
+        color: #fff;
+      }
+
+      .receipt td {
+        background-color: #333;
+      }
+
+      .layer-section {
+        background-color: #444;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      .total-section {
+        background-color: #333;
+        color: #fff;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .spacing {
+        height: 20px;
+        background-color: transparent;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Payout Calculator</h1>
+      <div class="form-group">
+        <label for="depositAmount">Deposit Amount ($)</label>
+        <input
+          type="number"
+          id="depositAmount"
+          oninput="selectTierBasedOnDeposit()"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="tradingProfit">Total Trading Profit ($)</label>
+        <input type="number" id="tradingProfit" required />
+      </div>
+      <div class="form-group">
+        <label for="investorShare">Investor Share (%)</label>
+        <input type="number" id="investorShare" required />
+      </div>
+      <div class="form-group">
+        <label for="investorTier">Investor Tier</label>
+        <select id="investorTier" onchange="showTierDetails()" required>
+          <option value="starter">Starter</option>
+          <option value="basic">Basic</option>
+          <option value="bronze">Bronze</option>
+          <option value="silver">Silver</option>
+          <option value="gold">Gold</option>
+          <option value="platinum">Platinum</option>
+          <option value="diamond">Diamond</option>
+          <option value="elite">Elite</option>
+        </select>
+        <div class="tier-details" id="tierDetails"></div>
+      </div>
+      <div class="form-group-inline">
+        <input type="checkbox" id="hasReferrer" />
+        <label for="hasReferrer">Investor has a Referrer</label>
+      </div>
+      <div class="form-group" id="referralLayerGroup" style="display: none">
+        <label for="referralLayer">Referral Layer</label>
+        <input type="number" id="referralLayer" value="1" />
+      </div>
+      <button onclick="calculatePayout()">Calculate Payout</button>
+      <div class="result" id="result"></div>
+
+      <h2>
+        Tier Information
+        <span class="chevron collapsed" onclick="toggleTierInfo()"></span>
+      </h2>
+      <div id="tierInfoTable" style="display: none">
         <table>
-            <thead>
-                <tr>
-                    <th>Tier Name</th>
-                    <th>Minimum Deposit ($)</th>
-                    <th>Performance Fee</th>
-                    <th>Profit Commission (%)</th>
-                    <th>Deposit Commission (%)</th>
-                    <th>Retention Ratio (r)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Starter</td>
-                    <td>2,000</td>
-                    <td>60%</td>
-                    <td>4%</td>
-                    <td>1.5%</td>
-                    <td>0.45</td>
-                </tr>
-                <tr>
-                    <td>Basic</td>
-                    <td>5,000</td>
-                    <td>58%</td>
-                    <td>4.8%</td>
-                    <td>1.9%</td>
-                    <td>0.45</td>
-                </tr>
-                <tr>
-                    <td>Bronze</td>
-                    <td>10,000</td>
-                    <td>55%</td>
-                    <td>5.4%</td>
-                    <td>2.2%</td>
-                    <td>0.45</td>
-                </tr>
-                <tr>
-                    <td>Silver</td>
-                    <td>25,000</td>
-                    <td>50%</td>
-                    <td>6%</td>
-                    <td>2.5%</td>
-                    <td>0.40</td>
-                </tr>
-                <tr>
-                    <td>Gold</td>
-                    <td>50,000</td>
-                    <td>50%</td>
-                    <td>6.6%</td>
-                    <td>2.8%</td>
-                    <td>0.35</td>
-                </tr>
-                <tr>
-                    <td>Platinum</td>
-                    <td>100,000</td>
-                    <td>45%</td>
-                    <td>7.1%</td>
-                    <td>3.1%</td>
-                    <td>0.31</td>
-                </tr>
-                <tr>
-                    <td>Diamond</td>
-                    <td>250,000</td>
-                    <td>42%</td>
-                    <td>7.6%</td>
-                    <td>3.4%</td>
-                    <td>0.28</td>
-                </tr>
-                <tr>
-                    <td>Elite</td>
-                    <td>500,000</td>
-                    <td>40%</td>
-                    <td>8%</td>
-                    <td>4%</td>
-                    <td>0.25</td>
-                </tr>
-            </tbody>
+          <thead>
+            <tr>
+              <th>Tier Name</th>
+              <th>Minimum Deposit ($)</th>
+              <th>Performance Fee</th>
+              <th>Profit Commission (%)</th>
+              <th>Deposit Commission (%)</th>
+              <th>Retention Ratio (r)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Starter</td>
+              <td>2,000</td>
+              <td>60%</td>
+              <td>4%</td>
+              <td>1.5%</td>
+              <td>0.45</td>
+            </tr>
+            <tr>
+              <td>Basic</td>
+              <td>5,000</td>
+              <td>58%</td>
+              <td>4.8%</td>
+              <td>1.9%</td>
+              <td>0.45</td>
+            </tr>
+            <tr>
+              <td>Bronze</td>
+              <td>10,000</td>
+              <td>55%</td>
+              <td>5.4%</td>
+              <td>2.2%</td>
+              <td>0.45</td>
+            </tr>
+            <tr>
+              <td>Silver</td>
+              <td>25,000</td>
+              <td>50%</td>
+              <td>6%</td>
+              <td>2.5%</td>
+              <td>0.40</td>
+            </tr>
+            <tr>
+              <td>Gold</td>
+              <td>50,000</td>
+              <td>50%</td>
+              <td>6.6%</td>
+              <td>2.8%</td>
+              <td>0.35</td>
+            </tr>
+            <tr>
+              <td>Platinum</td>
+              <td>100,000</td>
+              <td>45%</td>
+              <td>7.1%</td>
+              <td>3.1%</td>
+              <td>0.31</td>
+            </tr>
+            <tr>
+              <td>Diamond</td>
+              <td>250,000</td>
+              <td>42%</td>
+              <td>7.6%</td>
+              <td>3.4%</td>
+              <td>0.28</td>
+            </tr>
+            <tr>
+              <td>Elite</td>
+              <td>500,000</td>
+              <td>40%</td>
+              <td>8%</td>
+              <td>4%</td>
+              <td>0.25</td>
+            </tr>
+          </tbody>
         </table>
+      </div>
     </div>
 
     <script>
-        const tierInfo = {
-            starter: { minDeposit: 2000, performanceFee: '60%', profitCommission: '4%', retentionRatio: 0.45, depositCommission: 0.015 },
-            basic: { minDeposit: 5000, performanceFee: '58%', profitCommission: '4.8%', retentionRatio: 0.45, depositCommission: 0.019 },
-            bronze: { minDeposit: 10000, performanceFee: '55%', profitCommission: '5.4%', retentionRatio: 0.45, depositCommission: 0.022 },
-            silver: { minDeposit: 25000, performanceFee: '50%', profitCommission: '6%', retentionRatio: 0.40, depositCommission: 0.025 },
-            gold: { minDeposit: 50000, performanceFee: '50%', profitCommission: '6.6%', retentionRatio: 0.35, depositCommission: 0.028 },
-            platinum: { minDeposit: 100000, performanceFee: '45%', profitCommission: '7.1%', retentionRatio: 0.31, depositCommission: 0.031 },
-            diamond: { minDeposit: 250000, performanceFee: '42%', profitCommission: '7.6%', retentionRatio: 0.28, depositCommission: 0.034 },
-            elite: { minDeposit: 500000, performanceFee: '40%', profitCommission: '8%', retentionRatio: 0.25, depositCommission: 0.04 }
-        };
+      const tierInfo = {
+        starter: {
+          minDeposit: 2000,
+          performanceFee: '60%',
+          profitCommission: '4%',
+          retentionRatio: 0.45,
+          depositCommission: 0.015,
+        },
+        basic: {
+          minDeposit: 5000,
+          performanceFee: '58%',
+          profitCommission: '4.8%',
+          retentionRatio: 0.45,
+          depositCommission: 0.019,
+        },
+        bronze: {
+          minDeposit: 10000,
+          performanceFee: '55%',
+          profitCommission: '5.4%',
+          retentionRatio: 0.45,
+          depositCommission: 0.022,
+        },
+        silver: {
+          minDeposit: 25000,
+          performanceFee: '50%',
+          profitCommission: '6%',
+          retentionRatio: 0.4,
+          depositCommission: 0.025,
+        },
+        gold: {
+          minDeposit: 50000,
+          performanceFee: '50%',
+          profitCommission: '6.6%',
+          retentionRatio: 0.35,
+          depositCommission: 0.028,
+        },
+        platinum: {
+          minDeposit: 100000,
+          performanceFee: '45%',
+          profitCommission: '7.1%',
+          retentionRatio: 0.31,
+          depositCommission: 0.031,
+        },
+        diamond: {
+          minDeposit: 250000,
+          performanceFee: '42%',
+          profitCommission: '7.6%',
+          retentionRatio: 0.28,
+          depositCommission: 0.034,
+        },
+        elite: {
+          minDeposit: 500000,
+          performanceFee: '40%',
+          profitCommission: '8%',
+          retentionRatio: 0.25,
+          depositCommission: 0.04,
+        },
+      };
 
-        document.getElementById('hasReferrer').addEventListener('change', function () {
-            const referralLayerGroup = document.getElementById('referralLayerGroup');
-            referralLayerGroup.style.display = this.checked ? 'block' : 'none';
+      document
+        .getElementById('hasReferrer')
+        .addEventListener('change', function () {
+          const referralLayerGroup =
+            document.getElementById('referralLayerGroup');
+          referralLayerGroup.style.display = this.checked ? 'block' : 'none';
         });
 
-        function selectTierBasedOnDeposit() {
-            const depositAmount = parseFloat(document.getElementById('depositAmount').value);
-            let selectedTier = 'starter';
+      function selectTierBasedOnDeposit() {
+        const depositAmount = parseFloat(
+          document.getElementById('depositAmount').value
+        );
+        let selectedTier = 'starter';
 
-            for (const tier in tierInfo) {
-                if (depositAmount >= tierInfo[tier].minDeposit) {
-                    selectedTier = tier;
-                }
-            }
-
-            document.getElementById('investorTier').value = selectedTier;
-            showTierDetails();
+        for (const tier in tierInfo) {
+          if (depositAmount >= tierInfo[tier].minDeposit) {
+            selectedTier = tier;
+          }
         }
 
-        function showTierDetails() {
-            const selectedTier = document.getElementById('investorTier').value;
-            const tierDetails = tierInfo[selectedTier];
-            document.getElementById('tierDetails').innerHTML = `
+        document.getElementById('investorTier').value = selectedTier;
+        showTierDetails();
+      }
+
+      function showTierDetails() {
+        const selectedTier = document.getElementById('investorTier').value;
+        const tierDetails = tierInfo[selectedTier];
+        document.getElementById('tierDetails').innerHTML = `
                 Fee: ${tierDetails.performanceFee}, 
                 Profit Commission: ${tierDetails.profitCommission}, 
-                Deposit Commission: ${(tierDetails.depositCommission * 100).toFixed(1)}%, 
+                Deposit Commission: ${(
+                  tierDetails.depositCommission * 100
+                ).toFixed(1)}%, 
                 Retention Ratio: ${tierDetails.retentionRatio}
             `;
+      }
+
+      function calculatePayout() {
+        const depositAmount = parseFloat(
+          document.getElementById('depositAmount').value
+        );
+        const tradingProfit = parseFloat(
+          document.getElementById('tradingProfit').value
+        );
+        const investorShare =
+          parseFloat(document.getElementById('investorShare').value) / 100;
+        const investorTier = document.getElementById('investorTier').value;
+        const hasReferrer = document.getElementById('hasReferrer').checked;
+        const referralLayer = hasReferrer
+          ? parseInt(document.getElementById('referralLayer').value)
+          : 0;
+
+        const platformFee =
+          parseFloat(tierInfo[investorTier].performanceFee) / 100;
+        const investorPayout =
+          tradingProfit * investorShare * (1 - platformFee);
+        const depositCommissionBase =
+          depositAmount * tierInfo[investorTier].depositCommission;
+
+        let resultTable = `<table class="receipt">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Investor Payout</td>
+                <td>${investorPayout.toFixed(2)}</td>
+            </tr>`;
+
+        let totalDepositCommission = 0;
+        let totalProfitCommission = 0;
+
+        if (hasReferrer) {
+          const profitCommission1 =
+            parseFloat(tierInfo[investorTier].profitCommission) / 100;
+          const retentionRatio = tierInfo[investorTier].retentionRatio;
+
+          for (let n = 1; n <= referralLayer; n++) {
+            resultTable += `
+                <tr class="layer-section">
+                    <td colspan="2">Layer ${n}</td>
+                </tr>`;
+            const profitCommissionN =
+              investorPayout *
+              profitCommission1 *
+              Math.pow(retentionRatio, n - 1);
+            const depositCommissionN =
+              depositCommissionBase * Math.pow(retentionRatio, n - 1);
+            totalProfitCommission += profitCommissionN;
+            totalDepositCommission += depositCommissionN;
+            resultTable += `
+                <tr>
+                    <td>Profit Commission</td>
+                    <td>${profitCommissionN.toFixed(2)}</td>
+                </tr>
+                <tr>
+                    <td>Deposit Commission</td>
+                    <td>${depositCommissionN.toFixed(2)}</td>
+                </tr>`;
+          }
         }
 
-        function calculatePayout() {
-            const depositAmount = parseFloat(document.getElementById('depositAmount').value);
-            const tradingProfit = parseFloat(document.getElementById('tradingProfit').value);
-            const investorShare = parseFloat(document.getElementById('investorShare').value) / 100;
-            const investorTier = document.getElementById('investorTier').value;
-            const hasReferrer = document.getElementById('hasReferrer').checked;
-            const referralLayer = hasReferrer ? parseInt(document.getElementById('referralLayer').value) : 0;
+        const totalCommissions = totalProfitCommission + totalDepositCommission;
+        resultTable += `
+                <tr class="spacing"></tr>
+                <tr class="total-section">
+                    <td>Total Commissions</td>
+                    <td style="font-weight: bold;">${totalCommissions.toFixed(
+                      2
+                    )}</td>
+                </tr>
+                </tbody>
+        </table>`;
 
-            const platformFee = parseFloat(tierInfo[investorTier].performanceFee) / 100;
-            const investorPayout = tradingProfit * investorShare * (1 - platformFee);
-            const depositCommissionBase = depositAmount * tierInfo[investorTier].depositCommission;
+        document.getElementById('result').innerHTML = resultTable;
+      }
 
-            let resultText = `Investor Payout: $${investorPayout.toFixed(2)}\n`;
-            let totalDepositCommission = 0;
-            if (hasReferrer) {
-                const profitCommission1 = parseFloat(tierInfo[investorTier].profitCommission) / 100;
-                const retentionRatio = tierInfo[investorTier].retentionRatio;
-
-                let totalProfitCommission = 0;
-                for (let n = 1; n <= referralLayer; n++) {
-                    const profitCommissionN = investorPayout * profitCommission1 * Math.pow(retentionRatio, n - 1);
-                    const depositCommissionN = depositCommissionBase * Math.pow(retentionRatio, n - 1);
-                    totalProfitCommission += profitCommissionN;
-                    totalDepositCommission += depositCommissionN;
-                    resultText += `Profit Commission for Layer ${n}: $${profitCommissionN.toFixed(2)}\n`;
-                    resultText += `Deposit Commission for Layer ${n}: $${depositCommissionN.toFixed(2)}\n`;
-                }
-                resultText += `Total Profit Commission: $${totalProfitCommission.toFixed(2)}\n`;
-                resultText += `Total Deposit Commission: $${totalDepositCommission.toFixed(2)}`;
-            } else {
-                resultText += `Deposit Commission: $${depositCommissionBase.toFixed(2)}\n`;
-            }
-
-            document.getElementById('result').textContent = resultText;
+      function toggleTierInfo() {
+        const tierInfoTable = document.getElementById('tierInfoTable');
+        const chevron = document.querySelector('.chevron');
+        if (tierInfoTable.style.display === 'none') {
+          tierInfoTable.style.display = 'block';
+          chevron.classList.remove('collapsed');
+          chevron.classList.add('expanded');
+        } else {
+          tierInfoTable.style.display = 'none';
+          chevron.classList.add('collapsed');
+          chevron.classList.remove('expanded');
         }
+      }
     </script>
-</body>
+  </body>
 </html>
