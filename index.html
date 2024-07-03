@@ -92,7 +92,7 @@
     <div class="container">
         <h1>Payout Calculator</h1>
         <div class="form-group">
-            <label for="depositAmount">Deposit Amount (USDT)</label>
+            <label for="depositAmount">Deposit Amount ($)</label>
             <input type="number" id="depositAmount" oninput="selectTierBasedOnDeposit()" required>
         </div>
         <div class="form-group">
@@ -133,9 +133,10 @@
             <thead>
                 <tr>
                     <th>Tier Name</th>
-                    <th>Minimum Deposit (USDT)</th>
+                    <th>Minimum Deposit ($)</th>
                     <th>Performance Fee</th>
                     <th>Profit Commission (%)</th>
+                    <th>Deposit Commission (%)</th>
                     <th>Retention Ratio (r)</th>
                 </tr>
             </thead>
@@ -145,6 +146,7 @@
                     <td>2,000</td>
                     <td>60%</td>
                     <td>4%</td>
+                    <td>1.5%</td>
                     <td>0.45</td>
                 </tr>
                 <tr>
@@ -152,6 +154,7 @@
                     <td>5,000</td>
                     <td>58%</td>
                     <td>4.8%</td>
+                    <td>1.9%</td>
                     <td>0.45</td>
                 </tr>
                 <tr>
@@ -159,6 +162,7 @@
                     <td>10,000</td>
                     <td>55%</td>
                     <td>5.4%</td>
+                    <td>2.2%</td>
                     <td>0.45</td>
                 </tr>
                 <tr>
@@ -166,6 +170,7 @@
                     <td>25,000</td>
                     <td>50%</td>
                     <td>6%</td>
+                    <td>2.5%</td>
                     <td>0.40</td>
                 </tr>
                 <tr>
@@ -173,6 +178,7 @@
                     <td>50,000</td>
                     <td>50%</td>
                     <td>6.6%</td>
+                    <td>2.8%</td>
                     <td>0.35</td>
                 </tr>
                 <tr>
@@ -180,6 +186,7 @@
                     <td>100,000</td>
                     <td>45%</td>
                     <td>7.1%</td>
+                    <td>3.1%</td>
                     <td>0.31</td>
                 </tr>
                 <tr>
@@ -187,6 +194,7 @@
                     <td>250,000</td>
                     <td>42%</td>
                     <td>7.6%</td>
+                    <td>3.4%</td>
                     <td>0.28</td>
                 </tr>
                 <tr>
@@ -194,6 +202,7 @@
                     <td>500,000</td>
                     <td>40%</td>
                     <td>8%</td>
+                    <td>4%</td>
                     <td>0.25</td>
                 </tr>
             </tbody>
@@ -202,14 +211,14 @@
 
     <script>
         const tierInfo = {
-            starter: { minDeposit: 2000, performanceFee: '60%', profitCommission: '4%', retentionRatio: 0.45 },
-            basic: { minDeposit: 5000, performanceFee: '58%', profitCommission: '4.8%', retentionRatio: 0.45 },
-            bronze: { minDeposit: 10000, performanceFee: '55%', profitCommission: '5.4%', retentionRatio: 0.45 },
-            silver: { minDeposit: 25000, performanceFee: '50%', profitCommission: '6%', retentionRatio: 0.40 },
-            gold: { minDeposit: 50000, performanceFee: '50%', profitCommission: '6.6%', retentionRatio: 0.35 },
-            platinum: { minDeposit: 100000, performanceFee: '45%', profitCommission: '7.1%', retentionRatio: 0.31 },
-            diamond: { minDeposit: 250000, performanceFee: '42%', profitCommission: '7.6%', retentionRatio: 0.28 },
-            elite: { minDeposit: 500000, performanceFee: '40%', profitCommission: '8%', retentionRatio: 0.25 }
+            starter: { minDeposit: 2000, performanceFee: '60%', profitCommission: '4%', retentionRatio: 0.45, depositCommission: 0.015 },
+            basic: { minDeposit: 5000, performanceFee: '58%', profitCommission: '4.8%', retentionRatio: 0.45, depositCommission: 0.019 },
+            bronze: { minDeposit: 10000, performanceFee: '55%', profitCommission: '5.4%', retentionRatio: 0.45, depositCommission: 0.022 },
+            silver: { minDeposit: 25000, performanceFee: '50%', profitCommission: '6%', retentionRatio: 0.40, depositCommission: 0.025 },
+            gold: { minDeposit: 50000, performanceFee: '50%', profitCommission: '6.6%', retentionRatio: 0.35, depositCommission: 0.028 },
+            platinum: { minDeposit: 100000, performanceFee: '45%', profitCommission: '7.1%', retentionRatio: 0.31, depositCommission: 0.031 },
+            diamond: { minDeposit: 250000, performanceFee: '42%', profitCommission: '7.6%', retentionRatio: 0.28, depositCommission: 0.034 },
+            elite: { minDeposit: 500000, performanceFee: '40%', profitCommission: '8%', retentionRatio: 0.25, depositCommission: 0.04 }
         };
 
         document.getElementById('hasReferrer').addEventListener('change', function () {
@@ -237,11 +246,13 @@
             document.getElementById('tierDetails').innerHTML = `
                 Fee: ${tierDetails.performanceFee}, 
                 Profit Commission: ${tierDetails.profitCommission}, 
+                Deposit Commission: ${(tierDetails.depositCommission * 100).toFixed(1)}%, 
                 Retention Ratio: ${tierDetails.retentionRatio}
             `;
         }
 
         function calculatePayout() {
+            const depositAmount = parseFloat(document.getElementById('depositAmount').value);
             const tradingProfit = parseFloat(document.getElementById('tradingProfit').value);
             const investorShare = parseFloat(document.getElementById('investorShare').value) / 100;
             const investorTier = document.getElementById('investorTier').value;
@@ -250,8 +261,10 @@
 
             const platformFee = parseFloat(tierInfo[investorTier].performanceFee) / 100;
             const investorPayout = tradingProfit * investorShare * (1 - platformFee);
+            const depositCommissionBase = depositAmount * tierInfo[investorTier].depositCommission;
 
             let resultText = `Investor Payout: $${investorPayout.toFixed(2)}\n`;
+            let totalDepositCommission = 0;
             if (hasReferrer) {
                 const profitCommission1 = parseFloat(tierInfo[investorTier].profitCommission) / 100;
                 const retentionRatio = tierInfo[investorTier].retentionRatio;
@@ -259,10 +272,16 @@
                 let totalProfitCommission = 0;
                 for (let n = 1; n <= referralLayer; n++) {
                     const profitCommissionN = investorPayout * profitCommission1 * Math.pow(retentionRatio, n - 1);
+                    const depositCommissionN = depositCommissionBase * Math.pow(retentionRatio, n - 1);
                     totalProfitCommission += profitCommissionN;
+                    totalDepositCommission += depositCommissionN;
                     resultText += `Profit Commission for Layer ${n}: $${profitCommissionN.toFixed(2)}\n`;
+                    resultText += `Deposit Commission for Layer ${n}: $${depositCommissionN.toFixed(2)}\n`;
                 }
-                resultText += `Total Profit Commission: $${totalProfitCommission.toFixed(2)}`;
+                resultText += `Total Profit Commission: $${totalProfitCommission.toFixed(2)}\n`;
+                resultText += `Total Deposit Commission: $${totalDepositCommission.toFixed(2)}`;
+            } else {
+                resultText += `Deposit Commission: $${depositCommissionBase.toFixed(2)}\n`;
             }
 
             document.getElementById('result').textContent = resultText;
