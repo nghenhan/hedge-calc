@@ -84,8 +84,11 @@
             background-color: #333;
             color: #e0e0e0;
         }
-        .tier-details {
+        .tier-label {
+            font-weight: bold;
             margin-top: 10px;
+        }
+        .tier-details {
             font-size: 0.9em;
             color: #999;
         }
@@ -175,21 +178,7 @@
             <input type="number" id="tradingProfit" required>
         </div>
         <div class="form-group">
-            <label for="investorShare">Investor Share (%)</label>
-            <input type="number" id="investorShare" value="100" required>
-        </div>
-        <div class="form-group">
-            <label for="investorTier">Investor Tier</label>
-            <select id="investorTier" onchange="showTierDetails()" required>
-                <option value="starter">Starter</option>
-                <option value="basic">Basic</option>
-                <option value="bronze">Bronze</option>
-                <option value="silver">Silver</option>
-                <option value="gold">Gold</option>
-                <option value="platinum">Platinum</option>
-                <option value="diamond">Diamond</option>
-                <option value="elite">Elite</option>
-            </select>
+            <label class="tier-label" id="tierLabel">Your Tier: <span id="tierName"></span></label>
             <div class="tier-details" id="tierDetails"></div>
         </div>
         <div class="form-group-inline">
@@ -296,14 +285,14 @@
 
     <script>
         const tierInfo = {
-            starter: { minDeposit: 2000, performanceFee: '60%', profitCommission: '4%', retentionRatio: 0.45, depositCommission: 0.015 },
-            basic: { minDeposit: 5000, performanceFee: '58%', profitCommission: '4.8%', retentionRatio: 0.45, depositCommission: 0.019 },
-            bronze: { minDeposit: 10000, performanceFee: '55%', profitCommission: '5.4%', retentionRatio: 0.45, depositCommission: 0.022 },
-            silver: { minDeposit: 25000, performanceFee: '50%', profitCommission: '6%', retentionRatio: 0.40, depositCommission: 0.025 },
-            gold: { minDeposit: 50000, performanceFee: '50%', profitCommission: '6.6%', retentionRatio: 0.35, depositCommission: 0.028 },
-            platinum: { minDeposit: 100000, performanceFee: '45%', profitCommission: '7.1%', retentionRatio: 0.31, depositCommission: 0.031 },
-            diamond: { minDeposit: 250000, performanceFee: '42%', profitCommission: '7.6%', retentionRatio: 0.28, depositCommission: 0.034 },
-            elite: { minDeposit: 500000, performanceFee: '40%', profitCommission: '8%', retentionRatio: 0.25, depositCommission: 0.04 }
+            starter: { color: '#FF5733', minDeposit: 2000, performanceFee: '60%', profitCommission: '4%', retentionRatio: 0.45, depositCommission: 0.015 },
+            basic: { color: '#FF8D1A', minDeposit: 5000, performanceFee: '58%', profitCommission: '4.8%', retentionRatio: 0.45, depositCommission: 0.019 },
+            bronze: { color: '#CD7F32', minDeposit: 10000, performanceFee: '55%', profitCommission: '5.4%', retentionRatio: 0.45, depositCommission: 0.022 },
+            silver: { color: '#C0C0C0', minDeposit: 25000, performanceFee: '50%', profitCommission: '6%', retentionRatio: 0.40, depositCommission: 0.025 },
+            gold: { color: '#FFD700', minDeposit: 50000, performanceFee: '50%', profitCommission: '6.6%', retentionRatio: 0.35, depositCommission: 0.028 },
+            platinum: { color: '#E5E4E2', minDeposit: 100000, performanceFee: '45%', profitCommission: '7.1%', retentionRatio: 0.31, depositCommission: 0.031 },
+            diamond: { color: '#B9F2FF', minDeposit: 250000, performanceFee: '42%', profitCommission: '7.6%', retentionRatio: 0.28, depositCommission: 0.034 },
+            elite: { color: '#8C7853', minDeposit: 500000, performanceFee: '40%', profitCommission: '8%', retentionRatio: 0.25, depositCommission: 0.04 }
         };
 
         document.getElementById('hasReferrer').addEventListener('change', function () {
@@ -321,17 +310,12 @@
                 }
             }
 
-            document.getElementById('investorTier').value = selectedTier;
-            showTierDetails();
-        }
-
-        function showTierDetails() {
-            const selectedTier = document.getElementById('investorTier').value;
             const tierDetails = tierInfo[selectedTier];
+            document.getElementById('tierLabel').innerHTML = `Your Tier: <span id="tierName" style="color: ${tierDetails.color}">${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}</span>`;
             document.getElementById('tierDetails').innerHTML = `
-                Fee: ${tierDetails.performanceFee}, 
-                Profit Commission: ${tierDetails.profitCommission}, 
-                Deposit Commission: ${(tierDetails.depositCommission * 100).toFixed(1)}%, 
+                Fee: ${tierDetails.performanceFee} | 
+                Profit Commission: ${tierDetails.profitCommission} | 
+                Deposit Commission: ${(tierDetails.depositCommission * 100).toFixed(1)}% | 
                 Retention Ratio: ${tierDetails.retentionRatio}
             `;
         }
@@ -339,8 +323,8 @@
         function calculatePayout() {
             const depositAmount = parseFloat(document.getElementById('depositAmount').value);
             const tradingProfit = parseFloat(document.getElementById('tradingProfit').value);
-            const investorShare = parseFloat(document.getElementById('investorShare').value) / 100;
-            const investorTier = document.getElementById('investorTier').value;
+            const investorShare = 1; // 100% default
+            const investorTier = document.getElementById('tierName').innerText.toLowerCase();
             const hasReferrer = document.getElementById('hasReferrer').checked;
             const referralLayer = hasReferrer ? parseInt(document.getElementById('referralLayer').value) : 0;
 
