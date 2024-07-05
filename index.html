@@ -301,7 +301,7 @@
         });
 
         function selectTierBasedOnDeposit() {
-            const depositAmount = parseFloat(document.getElementById('depositAmount').value);
+            const depositAmount = parseFloat(document.getElementById('depositAmount').value) || 0;
             let selectedTier = 'starter';
 
             for (const tier in tierInfo) {
@@ -408,6 +408,9 @@
                 chevron.classList.remove('expanded');
             }
         }
+
+        // Initialize with Starter tier on page load
+        document.addEventListener('DOMContentLoaded', updateCalculator);
     </script>
 </body>
 </html>
