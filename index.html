@@ -171,25 +171,24 @@
         <h1>Payout Calculator</h1>
         <div class="form-group">
             <label for="depositAmount">Deposit Amount ($)</label>
-            <input type="number" id="depositAmount" oninput="selectTierBasedOnDeposit()" required>
+            <input type="number" id="depositAmount" oninput="updateCalculator()" required>
         </div>
         <div class="form-group">
             <label for="tradingProfit">Total Trading Profit ($)</label>
-            <input type="number" id="tradingProfit" required>
+            <input type="number" id="tradingProfit" oninput="updateCalculator()" required>
         </div>
         <div class="form-group">
             <label class="tier-label" id="tierLabel">Your Tier: <span id="tierName"></span></label>
             <div class="tier-details" id="tierDetails"></div>
         </div>
         <div class="form-group-inline">
-            <input type="checkbox" id="hasReferrer">
+            <input type="checkbox" id="hasReferrer" onchange="updateCalculator()">
             <label for="hasReferrer">Investor has a Referrer</label>
         </div>
         <div class="form-group" id="referralLayerGroup" style="display: none;">
             <label for="referralLayer">Referral Layer</label>
-            <input type="number" id="referralLayer" value="1">
+            <input type="number" id="referralLayer" value="1" oninput="updateCalculator()">
         </div>
-        <button onclick="calculatePayout()">Calculate Payout</button>
         <div class="result" id="result"></div>
 
         <h2>
@@ -298,6 +297,7 @@
         document.getElementById('hasReferrer').addEventListener('change', function () {
             const referralLayerGroup = document.getElementById('referralLayerGroup');
             referralLayerGroup.style.display = this.checked ? 'block' : 'none';
+            updateCalculator();
         });
 
         function selectTierBasedOnDeposit() {
@@ -320,9 +320,18 @@
             `;
         }
 
+        function updateCalculator() {
+            selectTierBasedOnDeposit();
+            calculatePayout();
+        }
+
         function calculatePayout() {
             const depositAmount = parseFloat(document.getElementById('depositAmount').value);
             const tradingProfit = parseFloat(document.getElementById('tradingProfit').value);
+            if (isNaN(depositAmount) || isNaN(tradingProfit)) {
+                document.getElementById('result').innerHTML = '';
+                return;
+            }
             const investorShare = 1; // 100% default
             const investorTier = document.getElementById('tierName').innerText.toLowerCase();
             const hasReferrer = document.getElementById('hasReferrer').checked;
@@ -332,7 +341,7 @@
             const investorPayout = tradingProfit * investorShare * (1 - platformFee);
             const depositCommissionBase = depositAmount * tierInfo[investorTier].depositCommission;
 
-            let resultTable = `<table class="receipt">
+            let resultTable = `<h2>Payouts</h2><table class="receipt">
                 <thead>
                     <tr>
                         <th>Description</th>
